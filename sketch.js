@@ -1,6 +1,7 @@
 let backgroundImg;
 let gameStartSound;
 let ambientSound;
+let gameState = "start"; // "start", "menu", "play"
 
 let fadeOpacity = 255;
 let fadeDirection = -1;
@@ -25,38 +26,48 @@ function setup() {
 }
 
 function draw() {
-  image(backgroundImg, 0, 0, width, height);
+  background(0);
 
-  // Dimming text loop
-  if (!enterPressed) {
-    fill(255, fadeOpacity);
-    text("Press Enter Key to begin", width / 2, height / 2 + 100);
-    fadeOpacity += fadeDirection * 2;
-    if (fadeOpacity <= 0 || fadeOpacity >= 255) {
-      fadeDirection *= -1;
-    }
-  }
-
-  // After Enter is pressed
-  if (enterPressed) {
+  if (gameState === "start") {
+    // Initial screen with "Click to Start"
     fill(255);
-    textStyle(BOLD);
-    text("Press Enter Key to begin", width / 2, height / 2 + 100);
+    textSize(32);
+    textAlign(CENTER, CENTER);
+    text("Click to Start", width / 2, height / 2);
+  }
 
-    // Start fade to black after 1 second
-    if (millis() - boldStartTime > 1000) {
-      fadeToBlack = true;
+  else if (gameState === "menu") {
+    // Menu screen with background and pulsing Enter prompt
+    image(backgroundImg, 0, 0, width, height);
+
+    if (!enterPressed) {
+      fill(255, fadeOpacity);
+      text("Press Enter Key to begin", width / 2, height / 2 + 100);
+      fadeOpacity += fadeDirection * 2;
+      if (fadeOpacity <= 0 || fadeOpacity >= 255) {
+        fadeDirection *= -1;
+      }
+    }
+
+    if (enterPressed) {
+      fill(255);
+      textStyle(BOLD);
+      text("Press Enter Key to begin", width / 2, height / 2 + 100);
+
+      if (millis() - boldStartTime > 1000) {
+        gameState = "transition";
+      }
     }
   }
 
-  // Fade to black over 5 seconds
-  if (fadeToBlack) {
-    blackOverlay += 255 / (60 * 7); // Assuming 60 FPS
+  else if (gameState === "transition") {
+    // Fade to black and fade out ambient sound
+    image(backgroundImg, 0, 0, width, height); // keep background visible during fade
+    blackOverlay += 255 / (60 * 7); // 7-second fade
     let overlayAlpha = constrain(blackOverlay, 0, 255);
     fill(0, overlayAlpha);
     rect(0, 0, width, height);
 
-    // Fade ambient sound volume
     let fadeProgress = overlayAlpha / 255;
     ambientSound.setVolume(1 - fadeProgress);
 
@@ -69,14 +80,16 @@ function draw() {
 }
 
 function mousePressed() {
-  userStartAudio(); // unlock audio context
-  if (!ambientSound.isPlaying()) {
+  if (gameState === "start") {
+    userStartAudio();
     ambientSound.loop();
+    gameStartSound.play();
+    gameState = "menu";
   }
 }
 
 function keyPressed() {
-  if (keyCode === ENTER && !enterPressed) {
+  if (gameState === "menu" && keyCode === ENTER && !enterPressed) {
     enterPressed = true;
     fadeOpacity = 255;
     boldStartTime = millis();
