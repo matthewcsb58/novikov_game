@@ -68,6 +68,12 @@ function draw() {
   }
 }
 
+function mousePressed() {
+  if (!ambientSound.isPlaying()) {
+    ambientSound.loop();
+  }
+}
+
 function keyPressed() {
   if (keyCode === ENTER && !enterPressed) {
     enterPressed = true;
