@@ -69,6 +69,7 @@ function draw() {
 }
 
 function mousePressed() {
+  userStartAudio(); // unlock audio context
   if (!ambientSound.isPlaying()) {
     ambientSound.loop();
   }
