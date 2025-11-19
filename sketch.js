@@ -81,9 +81,6 @@ function draw() {
 
 function mousePressed() {
   if (gameState === "start") {
-    userStartAudio();
-    ambientSound.loop();
-    gameStartSound.play();
     gameState = "menu";
   }
 }
